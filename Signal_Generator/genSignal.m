@@ -9,12 +9,19 @@
 %   Ts      [str]    = Time of sampling interval
 %   Fs      [1x1]    = Sampling frequency
 %   pulse   [struct] = structure defining pulse
-%       pulse.type [str] = String defining function type
+%       
+%       pulse.type [str] = 'cos' or 'sin'
 %       pulse.freq [1x1] = Center Frequency of waveform
 %       pulse.phase [1x1] = Phase of waveform
-%       pulse.Amplitude [1x1] = Amplitude of waveform
+%       pulse.amplitude [1x1] = Amplitude of waveform
 %       pulse.startTime [1x1] = Start time of waveform
-%       pulse.duration [1x1] = duration of waveform
+%       pulse.duration [1x1] = Duration of waveform
+%
+%       pulse.type [str] = 'bit'
+%       pulse.bitrate [1x1] = Bits per second 
+%       pulse.amplitude [1x2] = Amplitude correspoding to '0' and '1' 
+%       pulse.startTime [1x1] = Start time of waveform
+%       pulse.bits [Mx1] = Sequence of 0's and 1's to send
 %
 % OUTPUT:
 %   signal    [Nx1]   = Output signa1 vector
@@ -32,27 +39,45 @@ function [signal,sigTime] = genSignal(Ts,Fs,pulse)
 
 %% Determine Group
 sinGroup = strcmpi(pulse.type,{'sin','cos'}); % Sinusoids
+bitGroup = strcmpi(pulse.type,{'bit'}); % Bits
 
 %% Generate Waveform
 
-% Sinusoid
-if any(sinGroup)
+if any(sinGroup) % Sinusoid
     % Define Waveform
     if sinGroup(1)
-        wavType = @sind;
+        wavType = @sin;
     else
-        wavType = @cosd;
+        wavType = @cos;
     end
     pulseTime = 0:(1/Fs):pulse.duration-(1/Fs);
-    waveform = pulse.Amplitude*wavType(2*pi*pulse.freq*pulseTime + pulse.phase);
+    waveform = pulse.amplitude*wavType(2*pi*pulse.freq*pulseTime + deg2rad(pulse.phase));
+
+elseif bitGroup % Bits
+    nBits = length(pulse.bits);
+    pulse.duration = nBits/pulse.bitrate; % add warning and/or cutoff of signal???
+    bitLength = Fs/pulse.bitrate; % idx % account for aliasing??? % rounding
+    waveform = zeros(nBits*bitLength,1);
+    startIdx = 1;
+    for bit = 1:nBits % may be a non-for way to do
+        if pulse.bits(bit) % bit is 1
+            scalar = pulse.amplitude(2);
+        else % bit is 0
+            scalar = pulse.amplitude(1);
+        end
+        thisBit = ones(bitLength,1)*scalar;
+        endIdx = startIdx+bitLength-1;
+        waveform(startIdx:endIdx) = thisBit;
+        startIdx = endIdx+1;
+    end
     
 end
    
 %% Generate Singal
-sigTime  = [0:(1/Fs):Ts-(1/Fs)].';
+sigTime  = [0:(1/Fs):Ts-(1/Fs)].'; % s
 signal   = zeros(length(sigTime),1);
-wavStart = pulse.startTime*Fs+1;
-wavEnd   = wavStart + pulse.duration*Fs -1;
+wavStart = pulse.startTime*Fs+1; % idx
+wavEnd   = wavStart + pulse.duration*Fs -1; % idx
 signal(wavStart:wavEnd) = waveform;
 
     
