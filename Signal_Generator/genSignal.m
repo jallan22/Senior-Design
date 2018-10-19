@@ -1,20 +1,24 @@
 % genSignal.m
 %
-% DESCRIPTION: Short description of script purpose
+% DESCRIPTION: Will generate time domain signals based on user input
 %
 % EXECUTION:
 %   [out1,out2] = filename(in1,in2,in3)
 %
 % INPUT:
-%   in1     [str]    = variable description
-%   in2     [1x1]    = variable description
-%   in3     [struct] = variable description
-%       in3.field1 [1x1] = variable description
-%       in3.field2 [1x1] = variable description
+%   Ts      [str]    = Time of sampling interval
+%   Fs      [1x1]    = Sampling frequency
+%   pulse   [struct] = structure defining pulse
+%       pulse.type [str] = String defining function type
+%       pulse.freq [1x1] = Center Frequency of waveform
+%       pulse.phase [1x1] = Phase of waveform
+%       pulse.Amplitude [1x1] = Amplitude of waveform
+%       pulse.startTime [1x1] = Start time of waveform
+%       pulse.duration [1x1] = duration of waveform
 %
 % OUTPUT:
-%   out1    [2x2]   = variable description
-%   out2    [str]   = variable description (optional)
+%   signal    [Nx1]   = Output signa1 vector
+%   sigTime   [Nx1]   = Output time Vector
 %
 % EDC Systems - ECE 4805: Senior Design
 %
@@ -45,8 +49,8 @@ if any(sinGroup)
 end
    
 %% Generate Singal
-sigTime  = 0:(1/Fs):Ts-(1/Fs);
-signal   = zeros(1,length(sigTime));
+sigTime  = [0:(1/Fs):Ts-(1/Fs)].';
+signal   = zeros(length(sigTime),1);
 wavStart = pulse.startTime*Fs+1;
 wavEnd   = wavStart + pulse.duration*Fs -1;
 signal(wavStart:wavEnd) = waveform;

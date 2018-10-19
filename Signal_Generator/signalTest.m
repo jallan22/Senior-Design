@@ -20,7 +20,7 @@ pulse.type      = 'sin'; % Will always assume arguments are degrees
 pulse.freq      = 100;
 pulse.phase     = 0; % deg
 pulse.Amplitude = 1; % ???
-pulse.startTime = 1; % s
+pulse.startTime = 0.5; % s
 pulse.duration  = 1; % s
 
 
