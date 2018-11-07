@@ -3,8 +3,12 @@
 function [z] = farrow(signal,tau)
 
 %% Error Checking
+%If tau is a single value make it a vector
 signal = signal(:);
 nOut = length(signal);
+if numel(tau) ~= nOut
+    tau = repmat(tau,[nOut,1]);
+end 
 
 %% Define Farrow Parameters
 
@@ -25,7 +29,7 @@ z = NaN(nOut,1);
 for nIn = 8:length(signal)
     xn = signal(nIn-7:nIn);
     y = C*xn;
-    z(nIn-7) = y(1)+tau*(y(2)+tau*(y(3)+tau*(y(4))));
+    z(nIn-7) = y(1)+tau(nIn-7)*(y(2)+tau(nIn-7)*(y(3)+tau(nIn-7)*(y(4))));
 end
 
     
