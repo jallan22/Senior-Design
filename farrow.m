@@ -6,8 +6,12 @@ function [z] = farrow(signal,tau)
 %If tau is a single value make it a vector
 signal = signal(:);
 nOut = length(signal);
-if numel(tau) ~= nOut
+if  numel(tau) == 1
     tau = repmat(tau,[nOut,1]);
+    
+elseif numel(tau) ~= nOut
+    error('Invalid tau');
+    
 end 
 
 %% Define Farrow Parameters
