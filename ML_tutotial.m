@@ -69,6 +69,16 @@ dbclear if error
 
 % y=undefinedVar;
 
+%% Indexing
+
+m = [1 2 3; 4 5 6; 7 8 9].' -1;
+
+% The most important thing to know about indexing in Matlab is that
+% indexing is ones based. This means that the first indicie of a vector is
+% vector(1), NOT vector(0). This holds true for all dimesnions.
+
+% Another useful tool of indexing is selecting certian dimensions
+
 %% Defining Arrays 
 
 % Arrays are defined using [row,col] notation. where row is dimension 1,
@@ -108,6 +118,20 @@ matrix1 = [1 4 7;
 matrix2 = reshape(vector2,[3,3]); % == matrix1
 matrix3 = [matrix1 matrix2];
 
-%% Indexing
+% 5. Non-numerical arrays
+
+% Arrays that arent limited to numbers are cell arrays and structures. They
+% both have many uses while coding.
+
+% Cell arrays are defined as follows, as you can see, they hold many data
+% types.
+cell1 = {'string', 1, @sin};
+% To grab cell indicies, you have two options. To grab the cell, simply use
+% the folloowing.
+cell1_idx1_cell = cell1(1);
+% To grab the information a specific cell index holds, use the following.
+cell1_idx1_data = cell1{1};
+
+%% Structures
 
 %% Plotting and Figures 
