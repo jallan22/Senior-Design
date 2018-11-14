@@ -2,10 +2,6 @@
 
 clear,clc
 
-% fAxis = (0:2^20-1)/(2^20)*1;
-% plot(fAxis,20*log10(abs(fft(output2,2^20))))
-% plot(fAxis,20*log10(abs(fft(output2.*hanning(length(output2)),2^20))))
-
 % Run Farrow Filter
 tau1 = 0;
 tau2 = -0.5;
@@ -17,9 +13,10 @@ nSamps = 10e3;
 tau = linspace(-0.5,0.5,nSamps);
 t = 0:nSamps-1;
 fs = 1;
-signal = 1.2*sin(2*pi*t*0.1) + 1.2*sin(2*pi*t*0.11);
+signal = 1.2*sin(2*pi*t*0.05) + 1.2*sin(2*pi*t*0.2);
 signal = signal(:);
-%idealSig1 = 1.2*sin(2*pi*0.1*(t-3.5-tau1)) + 3*sin(2*pi*(t-3.5-tau1)*0.17);
+%idealSig1 = 1.2*sin(2*pi*0.1*(t-3.5-tau1)) +
+%3*sin(2*pi*(t-3.5-tau1)*0.17); % works for varying tau
 %idealSig2 = 1.2*sin(2*pi*0.1*(t-3.5-tau2))+ 3*sin(2*pi*(t-3.5-tau2)*0.17);
 %idealSig3 = 1.2*sin(2*pi*0.1*(t-3.5-tau3))+ 3*sin(2*pi*(t-3.5-tau3)*0.17);
 
@@ -28,7 +25,7 @@ output1 = farrow(signal,tau);
 % output3 = farrow(signal,tau3);
 
 %% Plot Output
-figure(1); clf;
+% figure(1); clf;
 
 % tau = 0
 % subplot(3,1,1); hold on; grid on;
@@ -55,9 +52,9 @@ figure(1); clf;
 % % axis([0 1e-3 -0.01 0.01])
 % title(['{\tau} = ', num2str(tau3)])
 % xlabel('Time (ms)')
-plot(t,output1);
+% plot(t,output1);
 
-%Frequency Plotting (Only works for real not imaginary)
+% Frequency Plotting (Only works for real not imaginary)
 nFFT = 2^20;
 fRes = fs/nFFT;
 fAxis = [0:nFFT-1]*fRes;
@@ -75,9 +72,11 @@ fftOutput = 20*log10(abs(fftOutput));
 fftOutput = fftOutput(1:midbin);
 
 figure(2); clf; hold on;
-plot(fAxis, fftInput)
-plot(fAxis,fftOutput);
-
+plot(fAxis,fftInput)
+plot(fAxis,fftOutput)
+xlabel('Frequency')
+title('Frequency Response')
+legend('Origional','Filtered')
 
 
 

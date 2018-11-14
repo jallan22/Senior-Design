@@ -14,6 +14,8 @@ elseif numel(tau) ~= nOut
     
 end 
 
+%% INSERT TAU MAPPER
+
 %% Define Farrow Parameters
 
 % Define Coefficients
