@@ -16,6 +16,8 @@ end
 
 %% INSERT TAU MAPPER
 
+[tau2,rsh] = tauMap(tau); % rsk = run-skip-hold
+
 %% Define Farrow Parameters
 
 % Define Coefficients
@@ -28,14 +30,23 @@ C=fliplr(C);
 
 %% Zero Pad
 nZeros = zeros(7,1);
-signal = [nZeros; signal];
+skipZeros = zeros(100,1);
+% signal = [nZeros; signal];
+signal = [nZeros; signal; skipZeros];
 
 %% Run Filter
 z = NaN(nOut,1);
-for nIn = 8:length(signal)
-    xn = signal(nIn-7:nIn);
+% for nIn = 8:length(signal)
+%     xn = signal(nIn-7:nIn);
+%     y = C*xn;
+%     z(nIn-7) = y(1)+tau(nIn-7)*(y(2)+tau(nIn-7)*(y(3)+tau(nIn-7)*(y(4))));
+% %     z(nIn-7) = y(1)+tau2(nIn-7)*(y(2)+tau2(nIn-7)*(y(3)+tau2(nIn-7)*(y(4))));
+% end
+
+for idx = 1:nOut
+    xn = signal(idx+rsh(idx):idx+rsh(idx)+7);
     y = C*xn;
-    z(nIn-7) = y(1)+tau(nIn-7)*(y(2)+tau(nIn-7)*(y(3)+tau(nIn-7)*(y(4))));
+    z(idx) = y(1)+tau2(idx)*(y(2)+tau2(idx)*(y(3)+tau2(idx)*(y(4))));    
 end
 
-    
+

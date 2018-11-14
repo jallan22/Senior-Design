@@ -10,7 +10,7 @@ tau3 = 0.5;
 
 % Define Test Singal
 nSamps = 10e3;
-tau = linspace(-0.5,0.5,nSamps);
+tau = linspace(5,-5,nSamps); tau(1:10) = 0;
 t = 0:nSamps-1;
 fs = 1;
 signal = 1.2*sin(2*pi*t*0.05) + 1.2*sin(2*pi*t*0.2);
