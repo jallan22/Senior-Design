@@ -1,4 +1,6 @@
 % farrowTest.m
+%
+% Script to test farrow implementtion to simulate Doppler on sinusoids
 
 clear,clc
 

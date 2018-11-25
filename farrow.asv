@@ -63,7 +63,7 @@ z = NaN(nOut,1);
 %     y = C*xn;
 %     z(idx) = y(1)+tau2(idx)*(y(2)+tau2(idx)*(y(3)+tau2(idx)*(y(4))));    
 % end
-lag = cumsum(rsh).';
+lag = cumsum(rsh);
 for idx = 1:nOut
     xn = signal(idx+lag(idx):idx+lag(idx)+7);
     y = C*xn;
@@ -71,18 +71,18 @@ for idx = 1:nOut
 end
 % Before, the "lag" was happening to only one sample, then indexing would 
 % catch everything back up, basically undoing any doppler. Now, the sum of
-% delays is the new "lag", meaning the delay could build up and get slower, 
-% or speed back up and catch up the buffer or even pass
+% delays is the new "lag" meaning lag could build up and get slower, or
+% speed back up and catch up the buffer or even pass
 
-% % Faster...?
-% A = repmat((0:7).',[1,nOut]); 
-% idx2 = bsxfun(@plus,A,(1:nOut)+lag);
-% xn2 = signal(idx2);
-% for i = 1:nOut
-%    y = C*xn2(:,i); 
-%    z2(i) = y(1)+tau2(i)*(y(2)+tau2(i)*(y(3)+tau2(i)*(y(4))));
-% end
-
+% Faster...?
+A = repmat((0:7).',[1,nOut]); 
+idx2 = bsxfun(@plus,A,(1:nOut));
+xn2 = signal(idx2);
+for i = 1:nOut
+   y = C*xn(:,1); 
+   z2(idx) = y(1)+tau2(idx)*(y(2)+tau2(idx)*(y(3)+tau2(idx)*(y(4))));
+end
+keyboard
 
 
 
