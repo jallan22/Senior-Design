@@ -7,16 +7,16 @@ clear
 %% USER DEFINED INPUTS
 
 % Signal Parameters
-freqs = [4500 2000 3000]; % frequency of sinusoids [nSigs x 1] [Hz]
-amps  = [1.25 1 0.75]; % Amplitudes of sinusoids [nSigs x 1]
+freqs = [4e6 2e6 1e6]; % frequency of sinusoids [nSigs x 1] [Hz]
+amps  = [1.25 1 3]; % Amplitudes of sinusoids [nSigs x 1]
 
 % Sampling Parameters
-Fs   = 10e3; % Sampling frequency [Hz]
-tWin = 1; % Signal duration [sec]
+Fs   = 10e6; % Sampling frequency [Hz]
+tWin = 0.1; % Signal duration [sec]
 nSamps = Fs*tWin; % ***NO NEED TO EDIT***
 
 % Doppler
-tau = linspace(0,50,nSamps); % Vector of tau (delay) inputs [nSamps x 1] 
+tau = linspace(0,500,nSamps); % Vector of tau (delay) inputs [nSamps x 1] 
 
 %% Construct Input 
 
