@@ -122,7 +122,7 @@ plot(fAxis,fftOutput)
 plot(fAxis,fftIdeal)
 xlabel(['Frequency [' order ']'])
 title('Frequency Response')
-legend('Origional','Filtered','Ideal','Location','southeast')
+legend('Original','Filtered','Ideal','Location','southeast')
 
 % Pring Peaks
 inFreq    = inFreq/fac;
