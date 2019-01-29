@@ -16,17 +16,14 @@ tWin = 0.1; % Signal duration [sec]
 nSamps = Fs*tWin; % ***NO NEED TO EDIT***
 
 % Doppler
-tau = [linspace(0,500,ceil(nSamps/2)) linspace()]; % Vector of tau (delay) inputs [nSamps x 1]
-
+% tau = linspace(0,500,ceil(nSamps/2)); % Vector of tau (delay) inputs [nSamps x 1]
+% tau = [tau fliplr(tau)];
+tau = linspace(0,500,nSamps);
 
 % Flags
-tauSave  = [];
-timeSave = [];
-freqSave = [];
+saveFlag = 1;
 
 %% Construct Input
-
-simStartTime = now;
 
 % Normalize Frequency
 freqs = freqs./Fs;
@@ -54,8 +51,11 @@ ts = ts(:);
 
 %% Generate Output 
 
+% Bound Tau
+[tauBounded,rsh] = tauMap(tau); % rsk = run-skip-hold
+
 % Run Farrow Filter
-farrowResp = farrow(signal,tau);
+farrowResp = farrow(signal,tauBounded,rsh);
 
 % Calculate Frequency Response
 nFFT   = 2^22;
@@ -145,6 +145,34 @@ for ff = 1:nFreqs
 end
 fprintf('\n')
 
+%% Save Results
+
+if saveFlag
+    currentTime = now;
+    saveDate = datestr(currentTime,'mmddyyyy');
+    saveTime = datestr(currentTime,'HHMMSS');
+    
+    dirName = sprintf('sim%s_%s',saveDate,saveTime);
+    
+    mkdir([pwd filesep 'Saved_Sims' filesep dirName]);
+    
+    simStruct = [];
+    simStruct.freqs = freqs;
+    simStruct.amps = amps;
+    simStruct.Fs = Fs;
+    simStruct.tWin = tWin;
+    simStruct.nSamps = nSamps;
+    simStruct.tau = tau;
+    simStruct.signal = signal;
+    simStruct.idealResp = idealResp;
+    simStruct.farrowResp = farrowResp;
+    simStruct.tauBounded = tauBounded;
+    simStruct.nFFT = nFFT;
+    simStruct.window = window;
+    simStruct.fAxis = fAxis;
+    simStruct.fft
+    
+end 
 
 
 
