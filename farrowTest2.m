@@ -26,20 +26,20 @@ saveFlag = 1;
 %% Construct Input
 
 % Normalize Frequency
-freqs = freqs./Fs;
+normFreqs = freqs./Fs;
 
 % Create Time
 t = linspace(0,tWin,nSamps); % Real time vector
 ts = 0:nSamps-1; % Sampled time indicies
 
 % Create Signals
-nSigs       = length(freqs);
+nSigs       = length(normFreqs);
 if nSigs ~= length(amps), warning('nSigs Invalid'); end
 signal      = zeros(1,nSamps);
 idealResp = zeros(1,nSamps);
 for iSig = 1:nSigs
-    idealResp = idealResp + amps(iSig)*sin(2*pi*(ts-3.5-tau)*freqs(iSig));
-    signal    = signal + amps(iSig)*sin(2*pi*ts*freqs(iSig));  
+    idealResp = idealResp + amps(iSig)*sin(2*pi*(ts-3.5-tau)*normFreqs(iSig));
+    signal    = signal + amps(iSig)*sin(2*pi*ts*normFreqs(iSig));  
 end
 
 % Comulmize
