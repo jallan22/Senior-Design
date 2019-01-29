@@ -173,7 +173,7 @@ if saveFlag
     simStruct.fftInput = fftInput;
     simStruct.fftIdeal = fftIdeal;
     simStruct.fftOutput = fftOutput;
-    simStruct = orderFields(simStruct);
+    simStruct = orderfields(simStruct);
     
 end 
 
