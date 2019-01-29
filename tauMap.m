@@ -50,3 +50,28 @@ for tt = 1:nTau
         rsh(tt) = rsh(tt)+1;
     end
 end
+% keyboard
+% % DEBUG PLOT
+% figure(1); clf; hold on; grid on;
+% plot(tau)
+% ylabel('Delay [s]')
+% xlabel('Sample')
+% title('Original Tau Vector')
+% axis([1 10000 tau(10000) tau(1)])
+% 
+% figure(2); clf; hold on; grid on;
+% plot(tauBounded)
+% ylabel('Delay [s]')
+% xlabel('Sample')
+% title('Original Tau Vector')
+% axis([1 10000 -0.5 0.5])
+
+
+
+
+
+
+
+
+
+
