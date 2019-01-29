@@ -10,6 +10,7 @@
 % INPUT:
 %   signal  [Nx1] = Input signal pulse
 %   tau     [Nx1] = Vector of sample delays
+%   rsh     [Nx1] = Vector of runs, skips, and holds
 %
 % OUTPUT:
 %   z       [Nx1] = Filtered output signal
@@ -22,7 +23,7 @@
 % Origional Version [11/05/2018], EDC SYSTEMS
 % [11/22/2018], Peyton McClintock, Add comments and fix lag
 
-function [z] = farrow(signal,tau)
+function [z] = farrow(signal,tau,rsh)
 
 %% Error Checking
 %If tau is a single value make it a vector
@@ -36,7 +37,7 @@ end
 
 %% Map Tau
 
-[tau2,rsh] = tauMap(tau); % rsk = run-skip-hold
+% [tau2,rsh] = tauMap(tau); % rsk = run-skip-hold
 
 %% Define Farrow Parameters
 
@@ -67,7 +68,7 @@ lag = cumsum(rsh).';
 for idx = 1:nOut
     xn = signal(idx+lag(idx):idx+lag(idx)+7);
     y = C*xn;
-    z(idx) = y(1)+tau2(idx)*(y(2)+tau2(idx)*(y(3)+tau2(idx)*(y(4))));    
+    z(idx) = y(1)+tau(idx)*(y(2)+tau(idx)*(y(3)+tau(idx)*(y(4))));    
 end
 % Before, the "lag" was happening to only one sample, then indexing would 
 % catch everything back up, basically undoing any doppler. Now, the sum of

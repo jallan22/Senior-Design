@@ -16,14 +16,17 @@ tWin = 0.1; % Signal duration [sec]
 nSamps = Fs*tWin; % ***NO NEED TO EDIT***
 
 % Doppler
-% tau = linspace(0,500,ceil(nSamps/2)); % Vector of tau (delay) inputs [nSamps x 1]
-% tau = [tau fliplr(tau)];
-tau = linspace(0,500,nSamps);
+tau = [linspace(0,500,ceil(nSamps/2)) linspace()]; % Vector of tau (delay) inputs [nSamps x 1]
+
 
 % Flags
-saveFlag = 1;
+tauSave  = [];
+timeSave = [];
+freqSave = [];
 
 %% Construct Input
+
+simStartTime = now;
 
 % Normalize Frequency
 freqs = freqs./Fs;
@@ -51,11 +54,8 @@ ts = ts(:);
 
 %% Generate Output 
 
-% Bound Tau
-[tauBounded,rsh] = tauMap(tau); % rsk = run-skip-hold
-
 % Run Farrow Filter
-farrowResp = farrow(signal,tauBounded,rsh);
+farrowResp = farrow(signal,tau);
 
 % Calculate Frequency Response
 nFFT   = 2^22;
@@ -144,8 +144,6 @@ for ff = 1:nFreqs
     fprintf('\n')
 end
 fprintf('\n')
-
-%% Save Results
 
 
 
