@@ -147,7 +147,35 @@ fprintf('\n')
 
 %% Save Results
 
-
+if saveFlag
+    currentTime = now;
+    saveDate = datestr(currentTime,'mmddyyyy');
+    saveTime = datestr(currentTime,'HHMMSS');
+    
+    dirName = sprintf('sim%s_%s',saveDate,saveTime);
+    
+    mkdir([pwd filesep 'Saved_Sims' filesep dirName]);
+    
+    simStruct = [];
+    simStruct.freqs = freqs;
+    simStruct.amps = amps;
+    simStruct.Fs = Fs;
+    simStruct.tWin = tWin;
+    simStruct.nSamps = nSamps;
+    simStruct.tau = tau;
+    simStruct.signal = signal;
+    simStruct.idealResp = idealResp;
+    simStruct.farrowResp = farrowResp;
+    simStruct.tauBounded = tauBounded;
+    simStruct.nFFT = nFFT;
+    simStruct.window = window;
+    simStruct.fAxis = fAxis;
+    simStruct.fftInput = fftInput;
+    simStruct.fftIdeal = fftIdeal;
+    simStruct.fftOutput = fftOutput;
+    simStruct = orderFields(simStruct);
+    
+end 
 
 
 
