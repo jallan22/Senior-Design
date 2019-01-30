@@ -147,15 +147,13 @@ legend('Original','Filtered','Ideal','Location','southeast')
 figure(2); clf; hold on; grid on;
 plot(tau)
 xlabel('Samples')
-ylabel('tau')
-title('Original Delay vector')
+title('Original Delay Vector')
 legend('Original')
 
 % Display Tau Bounded
 figure(3); clf; hold on; grid on;
 plot(tauBounded)
 xlabel('Samples')
-ylabel('tau-bounded')
 ylim([-.6 .6])
 
 % Display Spectrum
