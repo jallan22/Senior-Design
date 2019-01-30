@@ -138,8 +138,8 @@ figure(1); clf; hold on; grid on;
 plot(t,signal) %Plotting Original signal
 plot(t,farrowResp) %Plotting filtered signal
 plot(t,idealResp) %Plotting ideal response signal
-xlabel(['Time (Seconds)'])
-ylabel(['Amplitude'])
+xlabel('Time (Seconds)')
+ylabel('Amplitude')
 title('Time Response')
 legend('Original','Filtered','Ideal','Location','southeast')
 
@@ -153,6 +153,7 @@ title('Original Delay Vector')
 figure(3); clf; hold on; grid on;
 plot(tauBounded)
 xlabel('Samples')
+title('Tau-Bounded')
 ylim([-.6 .6])
 
 % Display Spectrum
