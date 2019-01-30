@@ -146,6 +146,7 @@ figure(3); clf; hold on; grid on;
 plot(tauBounded)
 xlabel('Samples')
 ylabel('tau-bounded')
+ylim([-.6 .6])
 
 % Display Spectrum
 figure(4); clf; hold on; grid on;
