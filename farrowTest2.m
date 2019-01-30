@@ -148,7 +148,6 @@ figure(2); clf; hold on; grid on;
 plot(tau)
 xlabel('Samples')
 title('Original Delay Vector')
-legend('Original')
 
 % Display Tau Bounded
 figure(3); clf; hold on; grid on;
