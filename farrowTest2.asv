@@ -7,7 +7,7 @@ clear
 %% USER DEFINED INPUTS
 
 % Signal Parameters
-freqs = [2e6]; % frequency of sinusoids [nSigs x 1] [Hz]
+freqs = [4e6]; % frequency of sinusoids [nSigs x 1] [Hz]
 amps  = [1.25]; % Amplitudes of sinusoids [nSigs x 1]
 
 % Sampling Parameters
@@ -126,14 +126,8 @@ fAxis = fAxis/fac;
 
 % Display Time 
 figure(1); clf; hold on; grid on;
-plot(t,signal)
-plot(t,farrowResp)
-plot(t,idealResp)
-xlabel(['Time (Seconds)'])
-ylabel(['Amplitude'])
-title('Time Response')
-legend('Original','Filtered','Ideal','Location','southeast')
-
+plot(t,signal);
+xlabel('Time
 % Display Tau
 figure(2); clf; hold on; grid on;
 
