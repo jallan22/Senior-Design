@@ -129,10 +129,10 @@ figure(1); clf; hold on; grid on;
 
 % Display Tau
 figure(2); clf; hold on; grid on;
-plot(tau)
-xlabel('Samples')
-title('Original Delay vector')
-legend('Original')
+plot(tau, signal)
+plot(tau, idealRes)
+plot(tau, fftIdeal)
+xlabel(
 
 % Display Tau Bounded
 figure(3); clf; hold on; grid on;
