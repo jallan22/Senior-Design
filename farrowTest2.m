@@ -147,7 +147,6 @@ legend('Original','Filtered','Ideal','Location','southeast')
 figure(2); clf; hold on; grid on;
 plot(tau)
 xlabel('Samples')
-ylabel('tau')
 title('Original Delay vector')
 legend('Original')
 
