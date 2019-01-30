@@ -7,7 +7,7 @@ clear
 %% USER DEFINED INPUTS
 
 % Signal Parameters
-freqs = [4e6]; % frequency of sinusoids [nSigs x 1] [Hz]
+freqs = [2e6]; % frequency of sinusoids [nSigs x 1] [Hz]
 amps  = [1.25]; % Amplitudes of sinusoids [nSigs x 1]
 
 % Sampling Parameters
@@ -53,7 +53,7 @@ ts = ts(:);
 %% Generate Output 
 
 % Bound Tau
-[tauBounded,rsh] = tauMap(tau); % rsk = run-skip-hold
+[tauBounded,rsh] = tauMap(tau); % rsh = run-skip-hold
 
 % Run Farrow Filter
 farrowResp = farrow(signal,tauBounded,rsh);
@@ -63,20 +63,29 @@ nFFT   = 2^22;
 fRes   = Fs/nFFT; % 1/nFFT;
 fAxis  = (0:nFFT-1)*fRes;
 window = hanning(length(signal));
-midbin = ceil(nFFT/2)+1;
-fAxis  = fAxis(1:midbin);
+midBin = ceil(nFFT/2); % + 1???
 
 fftInput = fft(window.*signal,nFFT);
 fftInput = 20*log10(abs(fftInput));
-fftInput = fftInput(1:midbin);
 
 fftIdeal = fft(window.*idealResp,nFFT);
 fftIdeal = 20*log10(abs(fftIdeal));
-fftIdeal = fftIdeal(1:midbin);
 
 fftOutput = fft(window.*farrowResp,nFFT);
 fftOutput = 20*log10(abs(fftOutput));
-fftOutput = fftOutput(1:midbin);
+
+% Shift Freqs
+if ~mod(nFFT,2)
+    fAxis     = [fliplr(-fAxis(2:midBin)) fAxis(1:midBin+1)].'; % fAxis(1:midbin);
+    fftInput  = [fftInput(midBin+2:end); fftInput(1:midBin+1)]; %fftInput(1:midbin);
+    fftIdeal  = [fftIdeal(midBin+2:end); fftIdeal(1:midBin+1)]; % fftIdeal(1:midbin);
+    fftOutput = [fftOutput(midBin+2:end); fftOutput(1:midBin+1)]; % fftOutput(1:midbin);
+else
+    fAxis     = [fliplr(-fAxis(2:midBin)) fAxis(1:midBin)].'; % fAxis(1:midbin);
+    fftInput  = [fftInput(midBin+1:end); fftInput(1:midBin)]; %fftInput(1:midbin);
+    fftIdeal  = [fftIdeal(midBin+1:end); fftIdeal(1:midBin)]; % fftIdeal(1:midbin);
+    fftOutput = [fftOutput(midBin+1:end); fftOutput(1:midBin)]; % fftOutput(1:midbin);
+end
 
 %% Find Peaks 
 
@@ -126,13 +135,28 @@ fAxis = fAxis/fac;
 
 % Display Time 
 figure(1); clf; hold on; grid on;
-plot(t,signal);
-xlabel('Time
+plot(t,signal) %Plotting Original signal
+plot(t,farrowResp) %Plotting filtered signal
+plot(t,idealResp) %Plotting ideal response signal
+xlabel(['Time (Seconds)'])
+ylabel(['Amplitude'])
+title('Time Response')
+legend('Original','Filtered','Ideal','Location','southeast')
+
 % Display Tau
 figure(2); clf; hold on; grid on;
+plot(tau)
+xlabel('Samples')
+ylabel('tau')
+title('Original Delay vector')
+legend('Original')
 
 % Display Tau Bounded
 figure(3); clf; hold on; grid on;
+plot(tauBounded)
+xlabel('Samples')
+ylabel('tau-bounded')
+ylim([-.6 .6])
 
 % Display Spectrum
 figure(4); clf; hold on; grid on;

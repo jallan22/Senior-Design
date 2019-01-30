@@ -63,20 +63,29 @@ nFFT   = 2^22;
 fRes   = Fs/nFFT; % 1/nFFT;
 fAxis  = (0:nFFT-1)*fRes;
 window = hanning(length(signal));
-midbin = ceil(nFFT/2)+1;
-fAxis  = fAxis(1:midbin);
+midBin = ceil(nFFT/2); % + 1???
 
 fftInput = fft(window.*signal,nFFT);
 fftInput = 20*log10(abs(fftInput));
-fftInput = fftInput(1:midbin);
 
 fftIdeal = fft(window.*idealResp,nFFT);
 fftIdeal = 20*log10(abs(fftIdeal));
-fftIdeal = fftIdeal(1:midbin);
 
 fftOutput = fft(window.*farrowResp,nFFT);
 fftOutput = 20*log10(abs(fftOutput));
-fftOutput = fftOutput(1:midbin);
+
+% Shift Freqs
+if ~mod(nFFT,2)
+    fAxis     = [fliplr(-fAxis(2:midBin)) fAxis(1:midBin+1)].'; % fAxis(1:midbin);
+    fftInput  = [fftInput(midBin+2:end); fftInput(1:midBin+1)]; %fftInput(1:midbin);
+    fftIdeal  = [fftIdeal(midBin+2:end); fftIdeal(1:midBin+1)]; % fftIdeal(1:midbin);
+    fftOutput = [fftOutput(midBin+2:end); fftOutput(1:midBin+1)]; % fftOutput(1:midbin);
+else
+    fAxis     = [fliplr(-fAxis(2:midBin)) fAxis(1:midBin)].'; % fAxis(1:midbin);
+    fftInput  = [fftInput(midBin+1:end); fftInput(1:midBin)]; %fftInput(1:midbin);
+    fftIdeal  = [fftIdeal(midBin+1:end); fftIdeal(1:midBin)]; % fftIdeal(1:midbin);
+    fftOutput = [fftOutput(midBin+1:end); fftOutput(1:midBin)]; % fftOutput(1:midbin);
+end
 
 %% Find Peaks 
 
