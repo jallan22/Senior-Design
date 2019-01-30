@@ -147,7 +147,7 @@ legend('Original','Filtered','Ideal','Location','southeast')
 figure(2); clf; hold on; grid on;
 plot(tau)
 xlabel('Samples')
-title('Original Delay vector')
+title('Original Delay Vector')
 legend('Original')
 
 % Display Tau Bounded
