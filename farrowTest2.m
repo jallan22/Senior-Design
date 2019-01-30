@@ -53,7 +53,7 @@ ts = ts(:);
 %% Generate Output 
 
 % Bound Tau
-[tauBounded,rsh] = tauMap(tau); % rsk = run-skip-hold
+[tauBounded,rsh] = tauMap(tau); % rsh = run-skip-hold
 
 % Run Farrow Filter
 farrowResp = farrow(signal,tauBounded,rsh);
@@ -132,6 +132,9 @@ figure(2); clf; hold on; grid on;
 
 % Display Tau Bounded
 figure(3); clf; hold on; grid on;
+plot(tauBounded)
+xlabel('Samples')
+ylabel('tau-bounded')
 
 % Display Spectrum
 figure(4); clf; hold on; grid on;
