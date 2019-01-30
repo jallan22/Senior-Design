@@ -126,9 +126,9 @@ fAxis = fAxis/fac;
 
 % Display Time 
 figure(1); clf; hold on; grid on;
-plot(t,signal)
-plot(t,farrowResp)
-plot(t,idealResp)
+plot(t,signal) %Plotting Original signal
+plot(t,farrowResp) %Plotting filtered signal
+plot(t,idealResp) %Plotting ideal response signal
 xlabel(['Time (Seconds)'])
 ylabel(['Amplitude'])
 title('Time Response')
