@@ -21,7 +21,8 @@ nSamps = Fs*tWin; % ***NO NEED TO EDIT***
 tau = linspace(0,500,nSamps);
 
 % Flags
-saveFlag = 1;
+complexFlag = 1;
+saveFlag    = 1;
 
 %% Construct Input
 
@@ -33,9 +34,9 @@ t = linspace(0,tWin,nSamps); % Real time vector
 ts = 0:nSamps-1; % Sampled time indicies
 
 % Create Signals
-nSigs       = length(normFreqs);
+nSigs     = length(normFreqs);
 if nSigs ~= length(amps), warning('nSigs Invalid'); end
-signal      = zeros(1,nSamps);
+signal    = zeros(1,nSamps);
 idealResp = zeros(1,nSamps);
 for iSig = 1:nSigs
     idealResp = idealResp + amps(iSig)*sin(2*pi*(ts-3.5-tau)*normFreqs(iSig));
@@ -123,8 +124,17 @@ fAxis = fAxis/fac;
 
 %% Display Results 
 
-% Display Spectrum
+% Display Time 
 figure(1); clf; hold on; grid on;
+
+% Display Tau
+figure(2); clf; hold on; grid on;
+
+% Display Tau Bounded
+figure(3); clf; hold on; grid on;
+
+% Display Spectrum
+figure(4); clf; hold on; grid on;
 plot(fAxis,fftInput)
 plot(fAxis,fftOutput)
 plot(fAxis,fftIdeal)
