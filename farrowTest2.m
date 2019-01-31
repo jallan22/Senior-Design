@@ -21,7 +21,7 @@ tau = [tau fliplr(tau)];
 % tau = linspace(0,500,nSamps);
 
 % Flags
-complexFlag = 0;
+complexFlag = 1;
 saveFlag    = 1;
 
 %% Construct Input
@@ -38,10 +38,17 @@ nSigs     = length(normFreqs);
 if nSigs ~= length(amps), warning('nSigs Invalid'); end
 signal    = zeros(1,nSamps);
 idealResp = zeros(1,nSamps);
+% for iSig = 1:nSigs
+%     idealResp = idealResp + amps(iSig)*sin(2*pi*(ts-3.5-tau)*normFreqs(iSig));
+%     signal    = signal + amps(iSig)*sin(2*pi*ts*normFreqs(iSig));
+% end
 for iSig = 1:nSigs
-    idealResp = idealResp + amps(iSig)*sin(2*pi*(ts-3.5-tau)*normFreqs(iSig));
-    signal    = signal + amps(iSig)*sin(2*pi*ts*normFreqs(iSig));  
-%     signal    = signal + amps(iSig)*sin(2*pi*t*freqs(iSig)); 
+    idealResp = idealResp + amps(iSig)*exp(2j*pi*(ts-3.5-tau)*normFreqs(iSig));
+    signal    = signal + amps(iSig)*exp(2j*pi*ts*normFreqs(iSig));
+end
+if ~complexFlag
+    idealResp = real(idealResp);
+    signal    = real(signal);
 end
 
 % Comulmize
@@ -135,30 +142,30 @@ fAxis = fAxis/fac;
 %% Display Results 
 
 % Display Time 
-figure(1); clf; hold on; grid on;
-plot(t,signal) %Plotting Original signal
-plot(t,farrowResp) %Plotting filtered signal
-plot(t,idealResp) %Plotting ideal response signal
+timeFig = figure(1); clf; hold on; grid on;
+plot(t,real(signal)) %Plotting Original signal
+plot(t,real(farrowResp)) %Plotting filtered signal
+plot(t,real(idealResp)) %Plotting ideal response signal
 xlabel('Time (Seconds)')
-ylabel('Amplitude')
+ylabel('Amplitude (Real)')
 title('Time Response')
 legend('Original','Filtered','Ideal','Location','southeast')
 
 % Display Tau
-figure(2); clf; hold on; grid on;
+tauFig = figure(2); clf; hold on; grid on;
 plot(tau)
 xlabel('Samples')
 title('Original Delay Vector')
 
 % Display Tau Bounded
-figure(3); clf; hold on; grid on;
+tauBoundedFig = figure(3); clf; hold on; grid on;
 plot(tauBounded)
 xlabel('Samples')
 title('Tau-Bounded')
 ylim([-.6 .6])
 
 % Display Spectrum
-figure(4); clf; hold on; grid on;
+freqFig = figure(4); clf; hold on; grid on;
 plot(fAxis,fftInput)
 plot(fAxis,fftOutput)
 plot(fAxis,fftIdeal)
@@ -179,17 +186,21 @@ for ff = 1:nFreqs
 end
 fprintf('\n')
 
-%% Save Results
+%% Save Results 
 
 if saveFlag
+    
+    % Make Directory
     currentTime = now;
+    workDir  = pwd;
     saveDate = datestr(currentTime,'mmddyyyy');
-    saveTime = datestr(currentTime,'HHMMSS');
+    saveTime = datestr(currentTime,'HHMMSS');    
+    dirName  = sprintf('sim%s_%s',saveDate,saveTime); 
+    zipDir   = [workDir filesep 'Saved_Sims'];
+%     saveDir  = [zipDir filesep dirName]; 
+%     mkdir(saveDir);
     
-    dirName = sprintf('sim%s_%s',saveDate,saveTime);
-    
-    mkdir([pwd filesep 'Saved_Sims' filesep dirName]);
-    
+    % Make Output Structure
     simStruct = [];
     simStruct.freqs = freqs;
     simStruct.amps = amps;
@@ -197,21 +208,40 @@ if saveFlag
     simStruct.tWin = tWin;
     simStruct.nSamps = nSamps;
     simStruct.tau = tau;
-    simStruct.signal = signal;
-    simStruct.idealResp = idealResp;
-    simStruct.farrowResp = farrowResp;
+%     simStruct.signal = signal;
+%     simStruct.idealResp = idealResp;
+%     simStruct.farrowResp = farrowResp;
     simStruct.tauBounded = tauBounded;
     simStruct.nFFT = nFFT;
     simStruct.window = window;
     simStruct.fAxis = fAxis;
-    simStruct.fftInput = fftInput;
-    simStruct.fftIdeal = fftIdeal;
-    simStruct.fftOutput = fftOutput;
+%     simStruct.fftInput = fftInput;
+%     simStruct.fftIdeal = fftIdeal;
+%     simStruct.fftOutput = fftOutput;
+    simStruct.saveDate = saveDate;
+    simStruct.saveTime = saveTime;
+    simStruct.complexFlag = complexFlag;
     simStruct = orderfields(simStruct);
     
-end 
-
-
+    % Save Structure
+    cd(zipDir)
+    save('simStruct','simStruct','-v7.3'); % TOO LARGE FOR GITHUB (>100Mb)
+    
+    % Save Figures
+    saveas(timeFig,'timeDomain','png'); % Time Domain
+    saveas(tauFig,'tau','png'); % Tau
+    saveas(tauBoundedFig,'tauBounded','png'); % Tau Bounded
+    saveas(freqFig,'freqDomain','png'); % Frequency Domain
+    
+    % Zip
+    saveFiles = {'simStruct.mat','timeDomain.png','tau.png','tauBounded.png','freqDomain.png'};
+    zip([dirName '.zip'],saveFiles);
+    delete(saveFiles{:})
+    
+    % Go Back to Work
+    cd(workDir)
+    
+end
 
 
 
