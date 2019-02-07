@@ -21,7 +21,11 @@
 %       pulse.bitrate [1x1] = Bits per second 
 %       pulse.amplitude [1x2] = Amplitude correspoding to '0' and '1' 
 %       pulse.startTime [1x1] = Start time of waveform
-%       pulse.bits [Mx1] = Sequence of 0's and 1's to send
+%       pulse.bits [Nx1] = Sequence of 0's and 1's to send
+%
+%       pulse.type [str] = 'qam'
+%       pulse.M [1x1] = Order of modulation
+%       pulse.bits [Nx1] = Sequence of 0's and 1's to send
 %
 % OUTPUT:
 %   signal    [Nx1]   = Output signa1 vector
@@ -39,7 +43,8 @@ function [signal,sigTime] = genSignal(Ts,Fs,pulse)
 
 %% Determine Group
 sinGroup = strcmpi(pulse.type,{'sin','cos'}); % Sinusoids
-bitGroup = strcmpi(pulse.type,{'bit'}); % Bits
+bitGroup = strcmpi(pulse.type,{'bit'});       % Bits
+modGroup = strcmpi(pulse.type,{'qam'});
 
 %% Generate Waveform
 
@@ -71,15 +76,62 @@ elseif bitGroup % Bits
         startIdx = endIdx+1;
     end
     
+elseif modGroup
+    
+    if modGroup(1)
+        % Verify Waveform Parameters
+        M     = pulse.M; % modulation order
+        Fc    = pulse.Fc; % Carrier freq
+        Ac    = pulse.Ac; % Carrier amp
+        bits  = pulse.bits(:); % info to send
+        nBits = length(bits);
+        nZPad = mod(nBits,log2(M));
+        if nZPad > 1 % Check to see that nBits match modulation order
+            bits  = [zeros(1,nZPad); bits]; % Could also pad end???
+            nBits = length(bits);
+            warning('nBits does not match modulation order, zero padding...');
+        end
+        
+        % Allocate Output
+        nSymbols  = nBits./log2(M); 
+        nSamps    = Ts*Fs;
+        symLength = floor(nSamps/nSymbols); % index length of one symbol, floored
+        waveform  = zeros(nSymbols*symLength,1);
+        
+        % Get Symbols
+        qamSymTx = qammod(bits,M,'InputType','Bit');
+        if length(qamSymTx) ~= nSymbols
+            error('Could not map bits symbols')
+        end
+        I = real(qamSymTx);
+        Q = imag(qamSymTx);
+        
+        % Place Symbols
+        startIdx = 1;
+        tR = linspace(0,symLength/Fs,symLength); % Realative symbol time
+        for sym = 1:nSymbols 
+            endIdx = startIdx+symLength-1;
+            thisSym = I(sym)*Ac*cos(2*pi*Fc*tR) + Q(sym)*Ac*sin(2*pi*Fc*tR);            
+            waveform(startIdx:endIdx) = thisSym;
+            startIdx = endIdx+1;
+        end
+    end
+    
+    
 end
    
 %% Generate Singal
 sigTime  = [0:(1/Fs):Ts-(1/Fs)].'; % s
-signal   = zeros(length(sigTime),1);
-wavStart = pulse.startTime*Fs+1; % idx
-wavEnd   = wavStart + pulse.duration*Fs -1; % idx
-signal(wavStart:wavEnd) = waveform;
+if ~any(modGroup)
+    signal   = zeros(length(sigTime),1);
+    wavStart = pulse.startTime*Fs+1; % idx
+    wavEnd   = wavStart + pulse.duration*Fs -1; % idx
+    signal(wavStart:wavEnd) = waveform;
+else
+    signal = waveform;  
+end
 
+% keyboard
     
     
     
