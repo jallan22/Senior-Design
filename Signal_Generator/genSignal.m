@@ -103,18 +103,32 @@ elseif modGroup
         if length(qamSymTx) ~= nSymbols
             error('Could not map bits symbols')
         end
-        I = real(qamSymTx);
-        Q = imag(qamSymTx);
         
-        % Place Symbols
-        startIdx = 1;
-        tR = linspace(0,symLength/Fs,symLength); % Realative symbol time
-        for sym = 1:nSymbols 
-            endIdx = startIdx+symLength-1;
-            thisSym = I(sym)*Ac*cos(2*pi*Fc*tR) + Q(sym)*Ac*sin(2*pi*Fc*tR);            
-            waveform(startIdx:endIdx) = thisSym;
-            startIdx = endIdx+1;
-        end
+        % Pulse Shape
+        qamModulator = comm.RectangularQAMModulator(M,'BitInput',true);
+        rolloff = 0.25;
+        txfilter = comm.RaisedCosineTransmitFilter('RolloffFactor',rolloff, ...
+            'FilterSpanInSymbols',nSymbols,'OutputSamplesPerSymbol',symLength);
+%         fvtool(txfilter,'impulse')
+        modSig = qamModulator(bits);
+        txSig = txfilter(modSig);
+        waveform = txSig;
+%         eyediagram(txSig(1:1000),symLength)
+        keyboard
+        
+%         keyboard
+%         % Place Symbols
+%         startIdx = 1;
+%         tR = linspace(0,symLength/Fs,symLength); % Realative symbol time
+%         for sym = 1:nSymbols 
+%             endIdx = startIdx+symLength-1;
+%             thisSym = I(sym)*Ac*cos(2*pi*Fc*tR) + Q(sym)*Ac*sin(2*pi*Fc*tR);            
+%             waveform(startIdx:endIdx) = thisSym;
+%             startIdx = endIdx+1;
+%         end
+%
+% https://www.mathworks.com/help/comm/ug/pulse-shaping-using-a-raised-cosine-filter.html
+
     end
     
     

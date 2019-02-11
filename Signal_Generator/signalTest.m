@@ -33,7 +33,7 @@ pulse3.type = 'qam';
 pulse3.M    = 16;
 pulse3.Ac   = 1;
 pulse3.bits = [1 0 1 1 0 1 1 1 1 0 1 0 0 0 0 0 1 1 1 1];
-pulse3.Fc   =  16; 
+pulse3.Fc   = 16;
 
 
 %% Generate Signal
@@ -68,6 +68,7 @@ for sym = 1:nSymbols-1
     
 end
 text(tLines(end)+0.5*tLines(1),yLim(2)*0.9,num2str(bits(:,end)))
+legend('QAM Signal','Carrier Signal','Location','southeast')
 
 
 
