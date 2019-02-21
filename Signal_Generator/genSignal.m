@@ -26,6 +26,7 @@
 %       pulse.type [str] = 'qam'
 %       pulse.M [1x1] = Order of modulation
 %       pulse.bits [Nx1] = Sequence of 0's and 1's to send
+%       pulse.rolloff [1x1] = Raised cosine rolloff
 %
 % OUTPUT:
 %   signal    [Nx1]   = Output signa1 vector
@@ -34,8 +35,9 @@
 % EDC Systems - ECE 4805: Senior Design
 %
 % Origional Version [10/19/2018], Peyton McClintock
+%           Updated [02/14/2019], Baseband QAM
 
-function [signal,sigTime] = genSignal(Ts,Fs,pulse)
+function [signal,sigTime,outStruct] = genSignal(tWin,Fs,pulse)
 
 %% Check Input
 
@@ -81,9 +83,8 @@ elseif modGroup
     if modGroup(1)
         % Verify Waveform Parameters
         M     = pulse.M; % modulation order
-        Fc    = pulse.Fc; % Carrier freq
-        Ac    = pulse.Ac; % Carrier amp
         bits  = pulse.bits(:); % info to send
+        rolloff = pulse.rolloff;
         nBits = length(bits);
         nZPad = mod(nBits,log2(M));
         if nZPad > 1 % Check to see that nBits match modulation order
@@ -94,40 +95,34 @@ elseif modGroup
         
         % Allocate Output
         nSymbols  = nBits./log2(M); 
-        nSamps    = Ts*Fs;
+        nSamps    = tWin*Fs;
         symLength = floor(nSamps/nSymbols); % index length of one symbol, floored
-        waveform  = zeros(nSymbols*symLength,1);
-        
-        % Get Symbols
-        qamSymTx = qammod(bits,M,'InputType','Bit');
-        if length(qamSymTx) ~= nSymbols
-            error('Could not map bits symbols')
-        end
+        filterSpan = 1; % ???
+%         keyboard
         
         % Pulse Shape
+        keyboard
         qamModulator = comm.RectangularQAMModulator(M,'BitInput',true);
-        rolloff = 0.25;
         txfilter = comm.RaisedCosineTransmitFilter('RolloffFactor',rolloff, ...
-            'FilterSpanInSymbols',nSymbols,'OutputSamplesPerSymbol',symLength);
-%         fvtool(txfilter,'impulse')
+            'FilterSpanInSymbols',filterSpan,'OutputSamplesPerSymbol',symLength);
         modSig = qamModulator(bits);
         txSig = txfilter(modSig);
         waveform = txSig;
-%         eyediagram(txSig(1:1000),symLength)
-        keyboard
-        
 %         keyboard
-%         % Place Symbols
-%         startIdx = 1;
-%         tR = linspace(0,symLength/Fs,symLength); % Realative symbol time
-%         for sym = 1:nSymbols 
-%             endIdx = startIdx+symLength-1;
-%             thisSym = I(sym)*Ac*cos(2*pi*Fc*tR) + Q(sym)*Ac*sin(2*pi*Fc*tR);            
-%             waveform(startIdx:endIdx) = thisSym;
-%             startIdx = endIdx+1;
-%         end
-%
-% https://www.mathworks.com/help/comm/ug/pulse-shaping-using-a-raised-cosine-filter.html
+        fvtool(txfilter,'impulse')
+        eyediagram(waveform,symLength)
+        keyboard
+        % https://www.mathworks.com/help/comm/ug/pulse-shaping-using-a-raised-cosine-filter.html
+        %
+        % https://www.mathworks.com/help/signal/ref/rcosdesign.html
+        
+        outStruct.type = pulse.type;
+        outStruct.M = M;
+        outStruct.rolloff = rolloff;
+        outStruct.symLength = symLength;
+        outStruct.nSymbols = nSymbols;
+        outStruct.filterSpan = filterSpan;
+        outStruct.symbols = modSig;
 
     end
     
@@ -135,7 +130,7 @@ elseif modGroup
 end
    
 %% Generate Singal
-sigTime  = [0:(1/Fs):Ts-(1/Fs)].'; % s
+sigTime  = [0:(1/Fs):tWin-(1/Fs)].'; % s
 if ~any(modGroup)
     signal   = zeros(length(sigTime),1);
     wavStart = pulse.startTime*Fs+1; % idx
