@@ -25,6 +25,7 @@
 %
 %       pulse.type [str] = 'qam'
 %       pulse.M [1x1] = Order of modulation
+%       pulse.preabmle [Xx1] = Preamble bits
 %       pulse.bits [Nx1] = Sequence of 0's and 1's to send
 %       pulse.rolloff [1x1] = Raised cosine rolloff
 %
@@ -37,7 +38,7 @@
 % Origional Version [10/19/2018], Peyton McClintock
 %           Updated [02/14/2019], Baseband QAM
 
-function [signal,sigTime,outStruct] = genSignal(tWin,Fs,pulse)
+function [signal,sigTime,sigStruct] = genSignal(tWin,Fs,pulse)
 
 %% Check Input
 
@@ -81,48 +82,65 @@ elseif bitGroup % Bits
 elseif modGroup
     
     if modGroup(1)
+        
+        % ADD PREAMBLE + transformations "complex correlation"
+        
+        filterSpan = 10; % ??? 
+        
         % Verify Waveform Parameters
-        M     = pulse.M; % modulation order
-        bits  = pulse.bits(:); % info to send
-        rolloff = pulse.rolloff;
-        nBits = length(bits);
-        nZPad = mod(nBits,log2(M));
+        M        = pulse.M; % modulation order
+        bits     = pulse.bits(:); % info to send
+        rolloff  = pulse.rolloff;  
+        nBitsSig = length(bits);
+        nZPad = mod(nBitsSig,log2(M));
         if nZPad > 1 % Check to see that nBits match modulation order
-            bits  = [zeros(1,nZPad); bits]; % Could also pad end???
-            nBits = length(bits);
-            warning('nBits does not match modulation order, zero padding...');
+            bits  = [zeros(1,nZPad); bits];
+            nBitsSig = length(bits);
+            warning('nBits does not match modulation order, zero padding front...');
         end
         
-        % Allocate Output
+        % Define Preamble and Zero Pad        
+        preamble = pulse.preamble;
+        nBitsPreamble = length(preamble);
+        nBitsZPad = filterSpan*log2(M);
+        
+        % Create Signal
+        txSig.bits  = [preamble(:); bits; zeros(nBitsZPad,1)];
+        nBits       = nBitsSig + nBitsPreamble + nBitsZPad;
+        
+        % Define Modulation Parameters        
         nSymbols  = nBits./log2(M); 
         nSamps    = tWin*Fs;
-        symLength = floor(nSamps/nSymbols); % index length of one symbol, floored
-        filterSpan = 1; % ???
-%         keyboard
-        
-        % Pulse Shape
-        keyboard
+        symLength = floor(nSamps/nSymbols); % index length of one symbol, floored        
+                
+        % Pulse Shape        
         qamModulator = comm.RectangularQAMModulator(M,'BitInput',true);
         txfilter = comm.RaisedCosineTransmitFilter('RolloffFactor',rolloff, ...
             'FilterSpanInSymbols',filterSpan,'OutputSamplesPerSymbol',symLength);
-        modSig = qamModulator(bits);
-        txSig = txfilter(modSig);
-        waveform = txSig;
-%         keyboard
-        fvtool(txfilter,'impulse')
-        eyediagram(waveform,symLength)
-        keyboard
-        % https://www.mathworks.com/help/comm/ug/pulse-shaping-using-a-raised-cosine-filter.html
-        %
-        % https://www.mathworks.com/help/signal/ref/rcosdesign.html
+        modSig = qamModulator(txSig.bits);
+        txSig.qam = txfilter(modSig);
+        waveform = txSig.qam;
         
-        outStruct.type = pulse.type;
-        outStruct.M = M;
-        outStruct.rolloff = rolloff;
-        outStruct.symLength = symLength;
-        outStruct.nSymbols = nSymbols;
-        outStruct.filterSpan = filterSpan;
-        outStruct.symbols = modSig;
+        % Create Output Structure
+        sigStruct.type = pulse.type;
+        sigStruct.M = M;
+        sigStruct.tWin = tWin;
+        sigStruct.Fs = Fs;
+        sigStruct.nSampsIdeal = nSamps;
+        sigStruct.nSampsOut = length(txSig.qam);
+        sigStruct.nBadSamps = filterSpan*symLength;
+        sigStruct.nSymbols = nSymbols;
+        sigStruct.symbols = modSig;
+        sigStruct.txSymInfo = modSig(1:end-filterSpan);
+        sigStruct.symLength = symLength;
+        sigStruct.rolloff = rolloff;                
+        sigStruct.filterSpan = filterSpan;        
+        sigStruct.preamble = preamble;
+        sigStruct.nBitsZPad = nBitsZPad; 
+        sigStruct.nBitsTx = nBits;
+        sigStruct.txSig = txSig;
+        sigStruct.txSigInfo.qam = txSig.qam(1:end-sigStruct.nBadSamps);
+        sigStruct.txSigInfo.bits = txSig.bits(1:end-sigStruct.nBadSamps);   
 
     end
     
@@ -139,8 +157,6 @@ if ~any(modGroup)
 else
     signal = waveform;  
 end
-
-% keyboard
     
     
     
