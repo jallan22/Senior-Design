@@ -5,11 +5,6 @@
 % EXECUTION:
 %
 % INPUT:
-%       demodParams.type [str] = 'qam'
-%       demodParams.M [1x1] = Order of modulation
-%       demodParams.rolloff [1x1] = Raised cosine rolloff
-%       demodParams.symLength [1x1] = length of a symbol in samples
-%       demodParams.nSymbols [1x1] = nSymbols;
 %
 % OUTPUT:
 %
@@ -17,17 +12,20 @@
 %
 % Origional Version [02/14/2019], Peyton McClintock
 
-function [signal,demodSym] = demodSig(rxSig,demodParams)
+function [demodStruct] = demodSig(demodParams,sigStruct)
 
 
-if strcmpi(demodParams.type,'qam')
+if strcmpi(sigStruct.type,'qam')
+    
+    rxSig = sigStruct.txSig.qam;
+    rxNoise = demodParams.noise*(randn(size(rxSig)) + 1j*randn(size(rxSig)));
+    rxSig = rxSig + rxNoise;
     
     % Read Input
-    M = demodParams.M;
-    rolloff = demodParams.rolloff;
-    symLength = demodParams.symLength;
-%     nSymbols = demodParams.nSymbols;
-    filterSpan = demodParams.filterSpan;
+    M = sigStruct.M;
+    rolloff = sigStruct.rolloff;
+    symLength = sigStruct.symLength;
+    filterSpan = sigStruct.filterSpan;
     
     % Create Filter
     qamDemodulator = comm.RectangularQAMDemodulator(M,'BitOutput',true);
@@ -35,14 +33,33 @@ if strcmpi(demodParams.type,'qam')
     'FilterSpanInSymbols',filterSpan,'InputSamplesPerSymbol',symLength, ...
     'DecimationFactor',symLength);
 
-    % ********************* Stupid
-%     k = log2(M);
-%     SNR = 10 + 10*log10(k) - 10*log10(symLength);
-%     noisySig = awgn(rxSig,SNR,'measured');
-
     % Demodulate
-    demodSym = rxfilter(rxSig);
-    signal = qamDemodulator(rxSig);
-%     keyboard
+    demodStruct.rxSym = rxfilter(rxSig);
+    demodStruct.rxSig = qamDemodulator(rxSig);
+    
+    % Format Signal    
+    demodStruct.rxSymInfo = demodStruct.rxSym(sigStruct.filterSpan+1:end);
+    demodStruct.rxNoise   = rxNoise;    
     
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
