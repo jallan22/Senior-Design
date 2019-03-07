@@ -17,8 +17,9 @@ function [demodStruct] = demodSig(demodParams,sigStruct)
 
 if strcmpi(sigStruct.type,'qam')
     
-    rxSig = sigStruct.txSig.qam;
-    rxNoise = demodParams.noise*(randn(size(rxSig)) + 1j*randn(size(rxSig)));
+    % Define Recieved Signal
+    rxSig = demodParams.gain*sigStruct.txSig.qam; % Amplitude (variance) + phase changes (preamble)
+    rxNoise = demodParams.noise*(randn(size(rxSig)) + 1j*randn(size(rxSig))); % more zeroes
     rxSig = rxSig + rxNoise;
     
     % Read Input
@@ -37,9 +38,11 @@ if strcmpi(sigStruct.type,'qam')
     demodStruct.rxSym = rxfilter(rxSig);
     demodStruct.rxSig = qamDemodulator(rxSig);
     
+    % Map Rx Sym to true Symbols
+    
     % Format Signal    
-    demodStruct.rxSymInfo = demodStruct.rxSym(sigStruct.filterSpan+1:end);
-    demodStruct.rxNoise   = rxNoise;    
+    demodStruct.rxSymInfo = demodStruct.rxSym(sigStruct.nSymbTrash+1:end-sigStruct.nSymbTrash);  %demodStruct.rxSym(sigStruct.filterSpan+1:end); % replace by preamble searching
+    demodStruct.rxNoise   = rxNoise;        
     
 end
 

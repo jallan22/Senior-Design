@@ -14,6 +14,7 @@
 
 function [serStruct] = serCalc(sigStruct,demodStruct)
 
+% Map Symbols
 
 % Find SNR
 Ps = sum(abs(demodStruct.rxSym).^2)/length(demodStruct.rxSym);    
@@ -24,6 +25,8 @@ SNRdB = 10*log10(SNR);
 % Find SER
 ser = (3/2)*erfc(sqrt( (2/5)*SNRdB ));
 
+% Define Output Structure
+serStruct.SNDdB = SNRdB;
 serStruct.ser = ser;
 
 % keyboard
