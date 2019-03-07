@@ -102,16 +102,23 @@ elseif modGroup
         % Define Preamble and Zero Pad        
         preamble = pulse.preamble;
         nBitsPreamble = length(preamble);
-        nBitsZPad = filterSpan*log2(M);
+        nSymbPeamble  = nBitsPreamble./log2(M);
+        nBitsZPad = nBitsSig; %filterSpan*log2(M); % hardcode**************
         
-        % Create Signal
-        txSig.bits  = [preamble(:); bits; zeros(nBitsZPad,1)];
-        nBits       = nBitsSig + nBitsPreamble + nBitsZPad;
+        % Create Tx Signal [Bits]
+        txSig.bits = [zeros(nBitsZPad,1); preamble(:); bits; zeros(nBitsZPad,1)];
+        nBits      = length(txSig.bits);
+        nBitsInfo  = nBitsPreamble+nBitsSig;
+        nSymbInfo  = nBitsInfo./log2(M);
+        nSymbTrash = nBitsZPad./log2(M);
+        nBitsTrash = nBitsZPad;
         
         % Define Modulation Parameters        
         nSymbols  = nBits./log2(M); 
         nSamps    = tWin*Fs;
-        symLength = floor(nSamps/nSymbols); % index length of one symbol, floored        
+        symLength = floor(nSamps/nSymbols); % index length of one symbol, floored    
+        nBadSamps =  nSymbTrash*symLength;
+        nSampsInfo = nSymbInfo*symLength;
                 
         % Pulse Shape        
         qamModulator = comm.RectangularQAMModulator(M,'BitInput',true);
@@ -128,19 +135,22 @@ elseif modGroup
         sigStruct.Fs = Fs;
         sigStruct.nSampsIdeal = nSamps;
         sigStruct.nSampsOut = length(txSig.qam);
-        sigStruct.nBadSamps = filterSpan*symLength;
+        sigStruct.nBadSamps =  nBadSamps; % filterSpan*symLength
         sigStruct.nSymbols = nSymbols;
         sigStruct.symbols = modSig;
-        sigStruct.txSymInfo = modSig(1:end-filterSpan);
+        sigStruct.txSymInfo = modSig(nSymbTrash+1:end-nSymbTrash); % done, includes preamble
         sigStruct.symLength = symLength;
+        sigStruct.nSymbTrash = nSymbTrash;
+        sigStruct.nSymbInfo = nSymbInfo;
         sigStruct.rolloff = rolloff;                
-        sigStruct.filterSpan = filterSpan;        
-        sigStruct.preamble = preamble;
+        sigStruct.filterSpan = filterSpan; 
+        sigStruct.preamble.qam = sigStruct.txSymInfo(1:nSymbPeamble);
+        sigStruct.preamble.bits = preamble;
         sigStruct.nBitsZPad = nBitsZPad; 
         sigStruct.nBitsTx = nBits;
         sigStruct.txSig = txSig;
-        sigStruct.txSigInfo.qam = txSig.qam(1:end-sigStruct.nBadSamps);
-        sigStruct.txSigInfo.bits = txSig.bits(1:end-sigStruct.nBadSamps);   
+        sigStruct.txSigInfo.qam = txSig.qam(nBadSamps+1:end-nBadSamps); %txSig.qam(1:end-sigStruct.nBadSamps);
+        sigStruct.txSigInfo.bits = [preamble(:); bits(:)];   
 
     end
     

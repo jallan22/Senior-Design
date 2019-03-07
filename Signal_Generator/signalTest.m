@@ -52,12 +52,11 @@ pulse3.preamble = randi([0,1],40,1);
 
 % Demod Params
 demodParams.noise = 0.3;
+demodParams.gain  = 1;
 
 % Demodulate
 addpath('/home/peyton11/Documents/EDC_Systems/Senior-Design-master/Signal_Demod');
 [demodStruct] = demodSig(demodParams,sigStruct); 
-
-
 
 b = reshape(pulse3.bits,[log2(pulse3.M),length(pulse3.bits)./log2(pulse3.M)]);
 
@@ -66,17 +65,17 @@ b = reshape(pulse3.bits,[log2(pulse3.M),length(pulse3.bits)./log2(pulse3.M)]);
 txCompare = sigStruct.txSymInfo;
 rxCompare = demodStruct.rxSymInfo;
 
-ser = abs(mean(txCompare-rxCompare)); % not really ser
-
-
 serStruct = serCalc(sigStruct,demodStruct);
+rmpath('/home/peyton11/Documents/EDC_Systems/Senior-Design-master/Signal_Demod');
 
 figure(1); hold on; grid on;
-plot(real(txCompare),imag(txCompare),'ro');
+plot(real(txCompare),imag(txCompare),'ko');
 plot(real(rxCompare),imag(rxCompare),'bo');
 legend('Transmitted','Recieved')
 titleText = sprintf('QAM Symbols\nSER = %.4f',serStruct.ser);
 title(titleText)
+xlabel('In-Phase')
+ylabel('Quadrature')
 axis([-4 4 -4 4])
 
 figure(2); hold on; grid on;
@@ -90,8 +89,6 @@ plot(rad2deg(angle(rxCompare)-angle(txCompare)))
 xlabel('Symbol')
 ylabel('Phase Difference')
 title('Tx - Rx Comparison')
-
-rmpath('/home/peyton11/Documents/EDC_Systems/Senior-Design-master/Signal_Demod');
 
 %% Plot Signal
 % figure(1); clf; hold on;
